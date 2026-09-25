@@ -20,10 +20,10 @@ export interface WeatherData {
   wind: {
     speed: number; // Wind speed
     deg: number; // Wind direction
-    gust?: number; // Wind gust speed
+    gust?: number; // Wind gust speed, since not everytime exists, used "?"
   };
   rain?: {
-    "1h"?: number; // 1-hour precipitation
+    "1h"?: number; // 1-hour precipitation, since not everytime exists, used "?"
   };
   sys: {
     country: string;
