@@ -84,7 +84,7 @@ function App() {
       // Get the JSON'ed data and store it in the state
       .then(([currentData, forecastData]: [WeatherData, ForecastData]) => {
         setWeather(currentData);
-        setForecast(getDailyForecasts(forecastData.list));
+        setForecast(getDailyForecasts(forecastData.list, forecastData.city.timezone));
         setHourlyData(getNext24Hours(forecastData.list));
         // Reset error and loading states
         setError(null);
@@ -178,9 +178,18 @@ function App() {
  
         {!isLoading && !error && weather && (
           <>
-            <CurrentWeatherCard weather={weather} aqi={aqi} />
-            {hourlyData.length > 0 && <HourlyChart items={hourlyData} />}
-            {forecast.length > 0 && <ForecastList items={forecast} />}
+            <div className="city-name">
+              <h1>{weather.name}, {weather.sys.country}</h1>
+            </div>
+            <div className="today-wrapper">
+              <h2 className="today-title">Today's Weather</h2>
+              <div className="today-grid">
+                <CurrentWeatherCard weather={weather} aqi={aqi} />
+                {hourlyData.length > 0 && <HourlyChart items={hourlyData} timezone={weather.timezone} />}
+              </div>
+              {forecast.length > 0 && <ForecastList items={forecast} timezone={weather.timezone} />}
+            </div>
+            
           </>
         )}
       </div>

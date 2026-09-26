@@ -1,10 +1,10 @@
 import type { ForecastItem } from "../types/weather";
 import { formatDate } from "../utils/weatherHelpers";
- 
-export function ForecastCard({ item }: { item: ForecastItem }) {
+
+export function ForecastCard({ item, timezone }: { item: ForecastItem; timezone: number }) {
   return (
     <div className="forecast-card">
-      <p className="forecast-card_date">{formatDate(item.dt_txt)}</p>
+      <p className="forecast-card_date">{formatDate(item.dt, timezone)}</p>
       <img
         src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`}
         alt={item.weather[0].description}

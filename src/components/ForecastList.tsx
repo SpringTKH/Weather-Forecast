@@ -1,11 +1,11 @@
 import type { ForecastItem } from "../types/weather";
 import { ForecastCard } from "./ForecastCard";
- 
-export function ForecastList({ items }: { items: ForecastItem[] }) {
+
+export function ForecastList({ items, timezone }: { items: ForecastItem[]; timezone: number }) {
   return (
     <div className="forecast-list">
       {items.map((item) => (
-        <ForecastCard key={item.dt} item={item} />
+        <ForecastCard key={item.dt} item={item} timezone={timezone} />
       ))}
     </div>
   );

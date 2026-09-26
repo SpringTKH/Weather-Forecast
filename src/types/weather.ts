@@ -57,6 +57,7 @@ export interface ForecastData {
   city: {
     name: string;
     country: string;
+    timezone: number; // 该城市相对UTC的偏移秒数，跟 WeatherData 的 timezone 同一个概念
   };
 }
 
