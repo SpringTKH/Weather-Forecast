@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
+import { Search } from 'lucide-react';
 import './App.css'
 
-import type { WeatherData, ForecastData, ForecastItem } from './types/weather'
-import { getDailyForecasts } from './utils/weatherHelpers'
+import type { WeatherData, ForecastData, ForecastItem, AirPollutionData } from './types/weather'
+import { getDailyForecasts, getNext24Hours } from './utils/weatherHelpers'
 import { CurrentWeatherCard } from './components/CurrentWeatherCard'
 import { ForecastList } from './components/ForecastList'
 import { SavedCities } from './components/SavedCities'
+import { HourlyChart } from './components/HourlyChart'
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -20,6 +22,8 @@ function App() {
  
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastItem[]>([]);
+  const [hourlyData, setHourlyData] = useState<ForecastItem[]>([]);
+  const [aqi, setAqi] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
  
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +33,10 @@ function App() {
     const raw = localStorage.getItem("savedCities");
     return raw ? JSON.parse(raw) : [];
   });
+
   const MAX_SAVED_CITIES = 5;
 
-useEffect(() => {
+  useEffect(() => {
     localStorage.setItem("savedCities", JSON.stringify(savedCities));
   }, [savedCities]);
  
@@ -80,17 +85,38 @@ useEffect(() => {
       .then(([currentData, forecastData]: [WeatherData, ForecastData]) => {
         setWeather(currentData);
         setForecast(getDailyForecasts(forecastData.list));
+        setHourlyData(getNext24Hours(forecastData.list));
         // Reset error and loading states
         setError(null);
         setIsLoading(false);
         addToSavedCities(currentData.name); // Use the official name returned by the API instead of the original string entered by the user
-      })
-      // Catch any errors that occur during the fetch requests
+        
+        // AQI: Independent additional request, failure will not affect the core content already displayed above
+        setAqi(null); // Reset first to avoid residual old data from the previous city
+        const { lat, lon } = currentData.coord;
+        const aqiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+ 
+        fetch(aqiUrl)
+          .then((res) => {
+            if (!res.ok) throw new Error("AQI fetch failed");
+            return res.json();
+          })
+          .then((aqiData: AirPollutionData) => {
+            setAqi(aqiData.list[0].main.aqi);
+          })
+          .catch(() => {
+            // Silent failure: maintain null, CurrentWeatherCard will display "Unknown"
+            setAqi(null);
+          });
+        })
+      // Catch any errors that occur during the fetch requests (only for Current & Forecast)
       .catch((err) => {
         setError(err.message);
         // Clear the previous messages
         setWeather(null);
         setForecast([]);
+        setHourlyData([]);
+        setAqi(null);
         setIsLoading(false);
       });
   }, [city]);
@@ -109,41 +135,51 @@ useEffect(() => {
  
   return (
     <div className="app">
-      <h1 className="app_title">Weather Dashboard</h1>
+      <header className="app_header">
+        <h1 className="app_title">Spring's Weather Forecast</h1>
+        <p className="app_subtitle">Greet you to have a beautiful day!</p>
  
-      <form onSubmit={handleSearch} className="search-bar">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Enter city name e.g. London"
-          className="search-bar_input"
+        <form onSubmit={handleSearch} className="search-bar">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Enter your city e.g. London"
+            className="search-bar_input"
+          />
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="search-bar_icon-button"
+            aria-label="Search"
+          >
+            <Search size={18} />
+          </button>
+        </form>
+ 
+        <SavedCities
+          cities={savedCities}
+          onSelect={(c) => {
+            setInputValue(c);
+            setCity(c);
+          }}
+          onRemove={(c) => {
+            setSavedCities((prev) => prev.filter((city) => city !== c));
+          }}
         />
-        <button type="submit" disabled={isLoading} className="search-bar_button">
-          {isLoading ? "Searching..." : "Search"}
-        </button>
-      </form>
-
-      <SavedCities
-        cities={savedCities}
-        onSelect={(c) => {
-          setInputValue(c);
-          setCity(c);
-        }}
-      />
+      </header>
  
       <div className="result-area">
-        {isLoading && (
-          <p className="loading-message">⏳ Loading weather data...</p>
-        )}
-        
+        {isLoading && <p className="loading-message">Loading...</p>}
+ 
         {!isLoading && error && (
           <p className="error-message">⚠️ {error}</p>
         )}
  
         {!isLoading && !error && weather && (
           <>
-            <CurrentWeatherCard weather={weather} />
+            <CurrentWeatherCard weather={weather} aqi={aqi} />
+            {hourlyData.length > 0 && <HourlyChart items={hourlyData} />}
             {forecast.length > 0 && <ForecastList items={forecast} />}
           </>
         )}

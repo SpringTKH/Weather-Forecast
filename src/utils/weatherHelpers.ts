@@ -7,6 +7,18 @@ export function getDailyForecasts(list: ForecastItem[]): ForecastItem[] {
   return noonForecasts.slice(0, 5);
 }
 
+// Take the nearest 8 items (8 * 3 hours = 24 hours) for the line chart
+export function getNext24Hours(list: ForecastItem[]): ForecastItem[] {
+  return list.slice(0, 8);
+}
+
+// Convert "2026-09-25 12:00:00" to "12:00" for chart X-axis
+export function formatHour(dtTxt: string): string {
+  const date = new Date(dtTxt);
+  const hours = date.getHours().toString().padStart(2, "0");
+  return `${hours}:00`;
+}
+
 // Convert "2026-09-25 12:00:00" to "Fri, 25 Sep" in a more readable format
 export function formatDate(dtTxt: string): string {
   const date = new Date(dtTxt);
@@ -32,4 +44,19 @@ export function getLocalTime(weather: WeatherData): string {
   const minutes = localDate.getUTCMinutes().toString().padStart(2, "0");
  
   return `${hours}:${minutes}`;
+}
+
+// OpenWeatherMap's AQI is a private 1-5 rating system, not a universal 0-500 scale
+// Here we convert the number to the corresponding text label
+const AQI_LABELS: Record<1 | 2 | 3 | 4 | 5, string> = {
+  1: "Good",
+  2: "Fair",
+  3: "Moderate",
+  4: "Poor",
+  5: "Very Poor",
+};
+ 
+export function getAqiLabel(aqi: 1 | 2 | 3 | 4 | 5 | null): string {
+  if (aqi === null) return "Unknown";
+  return AQI_LABELS[aqi];
 }

@@ -3,13 +3,17 @@ export interface WeatherData {
   name: string;
   dt: number;        // Unix Time
   timezone: number;  // Offset in seconds from UTC
+  coord: {
+    lon: number;
+    lat: number;
+  }
   main: {
     temp: number; // Temperature in Celsius
     feels_like: number; // Human comfort temperature
     temp_min: number;
     temp_max: number;
     humidity: number; // Humidity in percentage
-    pressure: number; // Atmospheric pressure in hPa
+    pressure: number; // Atmospheric pressure in hPa (1 hPa = 100 Pa)
   };
   weather: {
     main: string; // Weather group
@@ -23,7 +27,7 @@ export interface WeatherData {
     gust?: number; // Wind gust speed, since not everytime exists, used "?"
   };
   rain?: {
-    "1h"?: number; // 1-hour precipitation, since not everytime exists, used "?"
+    "1h"?: number; // 1-hour precipitation in unit mm, since not everytime exists, used "?"
   };
   sys: {
     country: string;
@@ -54,4 +58,22 @@ export interface ForecastData {
     name: string;
     country: string;
   };
+}
+
+export interface AirPollutionData {
+  list: {
+    main: {
+      aqi: 1 | 2 | 3 | 4 | 5; // Only these 5 numbers
+    };
+    components: {
+      co: number;
+      no: number;
+      no2: number;
+      o3: number;
+      so2: number;
+      pm2_5: number;
+      pm10: number;
+      nh3: number;
+    };
+  }[];
 }

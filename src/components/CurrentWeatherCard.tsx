@@ -1,7 +1,12 @@
 import type { WeatherData } from "../types/weather";
-import { getLocalTime } from "../utils/weatherHelpers";
+import { getLocalTime, getAqiLabel } from "../utils/weatherHelpers";
 
-export function CurrentWeatherCard({ weather }: { weather: WeatherData }) {
+interface CurrentWeatherCardProps {
+  weather: WeatherData;
+  aqi: 1 | 2 | 3 | 4 | 5 | null;
+}
+
+export function CurrentWeatherCard({ weather, aqi }: CurrentWeatherCardProps) {
   return (
     <div className="weather-card">
       <div className="weather-card_header">
@@ -17,10 +22,10 @@ export function CurrentWeatherCard({ weather }: { weather: WeatherData }) {
           className="weather-card_icon"
         />
       </div>
-
+ 
       <p className="weather-card_temp">{Math.round(weather.main.temp)}°C</p>
       <p className="weather-card_description">{weather.weather[0].description}</p>
-
+ 
       <div className="weather-card_details">
         <div className="weather-card_detail-item">
           <span className="label">Feels like</span>
@@ -33,6 +38,18 @@ export function CurrentWeatherCard({ weather }: { weather: WeatherData }) {
         <div className="weather-card_detail-item">
           <span className="label">Wind</span>
           <span className="value">{weather.wind.speed} m/s</span>
+        </div>
+        <div className="weather-card_detail-item">
+          <span className="label">Pressure</span>
+          <span className="value">{weather.main.pressure} hPa</span>
+        </div>
+        <div className="weather-card_detail-item">
+          <span className="label">Direction</span>
+          <span className="value">{weather.wind.deg}°</span>
+        </div>
+        <div className="weather-card_detail-item">
+          <span className="label">AQI</span>
+          <span className="value">{getAqiLabel(aqi)}</span>
         </div>
       </div>
     </div>

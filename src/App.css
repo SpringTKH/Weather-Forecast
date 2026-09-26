@@ -1,68 +1,156 @@
 .app {
-  max-width: 420px;
-  margin: 40px auto;
   font-family: sans-serif;
-  padding: 0 16px;
+}
+
+/* ────────────────────
+   Header：横跨整个浏览器宽度的渐变天空背景
+   ──────────────────── */
+.app_header {
+  width: 100%;
+  background: linear-gradient(135deg, #fcd3c1 0%, #e8b8d4 30%, #8b93d4 70%, #3d4a8a 100%);
+  padding: 100px 20px 50px;
+  text-align: center;
 }
 
 .app_title {
-  text-align: center;
-  margin-bottom: 24px;
+  color: white;
+  font-size: 60px;
+  font-weight: 800;
+  margin: 0 0 36px 0;
+  text-shadow:
+    0 0 8px rgba(255, 255, 255, 0.8),
+    0 0 16px rgba(255, 255, 255, 0.5),
+    0 0 24px rgba(255, 255, 255, 0.3);
+}
+
+.app_subtitle {
+  color: white;
+  font-size: 20px;
+  opacity: 0.9;
+  margin: 0 0 12px 0;
 }
 
 .search-bar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 4px 4px 4px 20px;
+  max-width: 480px;
+  margin: 0 auto 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .search-bar_input {
   flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.search-bar_button {
-  padding: 10px 16px;
   border: none;
-  border-radius: 8px;
-  background-color: #4a90d9;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
+  outline: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 15px;
+  color: #333;
 }
 
-.search-bar_button:disabled {
-  background-color: #aac4e0;
+.search-bar_icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #6b6b8a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.search-bar_icon-button:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.search-bar_icon-button:disabled {
+  color: #ccc;
   cursor: not-allowed;
 }
 
+/* ────────────────────
+   Saved Cities
+   ──────────────────── */
 .saved-cities {
   display: flex;
   gap: 8px;
+  justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  width: fit-content;   /* shrink-wrap the chips */
+  max-width: 480px;     /* but never exceed this */
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
+  padding: 10px 14px;
 }
-
-.saved-cities__chip {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
+ 
+.saved-cities_chip-wrapper {
+  position: relative; /* To let the internal remove button use absolute positioning */
+  display: flex;
+  align-items: center;
+}
+ 
+.saved-cities_chip {
+  padding: 6px 14px;
+  border: none;
   border-radius: 20px;
-  background: white;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  color: #444;
   cursor: pointer;
 }
+ 
+.saved-cities_chip:hover {
+  background: white;
+}
+ 
+/* 删除叉叉，预设隐藏，hover整个chip-wrapper时才出现 */
+.saved-cities_remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #ff5e5e;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  padding: 0;
+  box-sizing: border-box;
+}
+ 
+.saved-cities_remove svg {
+  width: 10.5px !important;
+  height: 10.5px !important;
+  stroke-width: 3px; /* 让线条变粗，视觉上明显很多 */
+}
 
-.saved-cities__chip:hover {
-  background: #f0f4fa;
-  border-color: #4a90d9;
+.saved-cities_chip-wrapper:hover .saved-cities_remove {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* ────────────────────
-   Result Area
+   Result Area —— 宽度限制放在这里，不是最外层的 .app
    ──────────────────── */
+.result-area {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
 
 .loading-message {
   color: #666;
@@ -72,8 +160,6 @@
 .error-message {
   color: #d93636;
   text-align: center;
-  font-size: 20px;
-  font-weight: bold;
 }
 
 /* ────────────────────
@@ -137,6 +223,21 @@
 .weather-card_detail-item .value {
   font-size: 16px;
   font-weight: bold;
+}
+
+.hourly-chart {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.hourly-chart_caption {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  margin: 8px 0 0 0;
 }
 
 /* ────────────────────
