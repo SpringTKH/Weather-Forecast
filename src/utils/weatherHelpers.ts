@@ -9,11 +9,11 @@ function toLocalDate(utcDt: number, timezoneOffsetSeconds: number): Date {
 
 // Change 40 items of 3-hour interval data into "one entry per day" (take the entry closest to 12 o'clock local time)
 
-// Why not use "exactly equal to 12 o'clock" to judge:
-// forecast's data point is every 3 hours（UTC 00, 03, 06...），
-// Only when the time zone offset can be divided by 3 (like Tokyo UTC+9), the local time will fall exactly on the hour
-// For example, Kuala Lumpur UTC+8, London UTC+0/+1, the local time will often be 11:00, 13:00, which is "a little bit" off, and can never catch
-// the exact "12:00", causing some cities to miss all the data, and the 5-day forecast disappears.
+// Why not use an exact "12:00" match:
+// The forecast provides one data point every 3 hours (UTC 00, 03, 06...).
+// Only when the timezone offset is divisible by 3 (e.g. Tokyo UTC+9) will a local time land exactly on the hour.
+// For cities like Kuala Lumpur (UTC+8) or London (UTC+0/+1), the local times are often 11:00 or 13:00 —
+// never exactly 12:00 — causing all entries to be skipped and the 5-day forecast to disappear.
 export function getDailyForecasts(
   list: ForecastItem[],
   timezoneOffsetSeconds: number
@@ -128,7 +128,7 @@ export function getAqiLabel(aqi: 1 | 2 | 3 | 4 | 5 | null): string {
   return AQI_LABELS[aqi];
 }
 
-// Change the Wind Direction from （0-360） to "N 9.3°E" format
+// Convert wind direction from degrees (0-360) to compass notation like "N 9.3° E"
 // Rule: First determine whether it is North or South
 // Then calculate how many degrees away from the North/South
 // Finally determine whether it is East or West
