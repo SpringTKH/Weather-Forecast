@@ -1,29 +1,29 @@
 import type { ForecastItem, WeatherData } from "../types/weather";
 
-// Change UTC dt time stamp to the Date object of the city's local time
-// This is the common logic for all time-related calculations
-// Any new function that needs "local time" should call this
+// "Daily forecast summary": use the noon entry as the representative (for icon, description, etc.)
+// But maxTemp/minTemp are the true daily high/low calculated from ALL entries that day,
+// not the narrow "3-hour fluctuation" temp_max/temp_min inside a single entry
+export interface DailyForecast {
+  representative: ForecastItem; // The entry closest to noon — used to display the icon, description, and time
+  maxTemp: number; // The highest temperature among all entries for that day
+  minTemp: number; // The lowest temperature among all entries for that day
+}
+
+// Convert a UTC dt timestamp into a Date object representing the city's local time
 function toLocalDate(utcDt: number, timezoneOffsetSeconds: number): Date {
   return new Date((utcDt + timezoneOffsetSeconds) * 1000);
 }
 
-// Change 40 items of 3-hour interval data into "one entry per day" (take the entry closest to 12 o'clock local time)
-
-// Why not use an exact "12:00" match:
-// The forecast provides one data point every 3 hours (UTC 00, 03, 06...).
-// Only when the timezone offset is divisible by 3 (e.g. Tokyo UTC+9) will a local time land exactly on the hour.
-// For cities like Kuala Lumpur (UTC+8) or London (UTC+0/+1), the local times are often 11:00 or 13:00 —
-// never exactly 12:00 — causing all entries to be skipped and the 5-day forecast to disappear.
+// Group the 40 three-hour forecast entries by local date,
+// and for each group compute: the representative entry (closest to noon) + the true daily high/low temperature
 export function getDailyForecasts(
   list: ForecastItem[],
   timezoneOffsetSeconds: number
-): ForecastItem[] {
-  // First, group the data by "local date"
+): DailyForecast[] {
   const groupedByDate = new Map<string, ForecastItem[]>();
 
   for (const item of list) {
     const localDate = toLocalDate(item.dt, timezoneOffsetSeconds);
-    // Use "Year-Month-Day" as the grouping key (use UTC method to read, because it's already an adjusted fake timestamp)
     const dateKey = `${localDate.getUTCFullYear()}-${localDate.getUTCMonth()}-${localDate.getUTCDate()}`;
 
     if (!groupedByDate.has(dateKey)) {
@@ -32,11 +32,11 @@ export function getDailyForecasts(
     groupedByDate.get(dateKey)!.push(item);
   }
 
-  // For each group, pick the one closest to 12 o'clock local time
-  const dailyRepresentatives: ForecastItem[] = [];
+  const dailyForecasts: DailyForecast[] = [];
 
   for (const itemsInOneDay of groupedByDate.values()) {
-    let closest = itemsInOneDay[0];
+    // Find the entry closest to noon to use as the day's representative
+    let representative = itemsInOneDay[0];
     let smallestDiff = Infinity;
 
     for (const item of itemsInOneDay) {
@@ -46,60 +46,69 @@ export function getDailyForecasts(
 
       if (diff < smallestDiff) {
         smallestDiff = diff;
-        closest = item;
+        representative = item;
       }
     }
 
-    dailyRepresentatives.push(closest);
+    // Iterate through all entries for the day to find the true daily high/low temperature
+    // (not using any single entry's temp_max/temp_min — comparing the raw temp across all entries)
+    const allTemps = itemsInOneDay.map((item) => item.main.temp);
+    const maxTemp = Math.max(...allTemps);
+    const minTemp = Math.min(...allTemps);
+
+    dailyForecasts.push({ representative, maxTemp, minTemp });
   }
 
-  return dailyRepresentatives.slice(0, 5);
+  return dailyForecasts.slice(0, 5);
 }
 
-// Get the nearest 8 data points (8 * 3 hours = 24 hours), used for the line chart
+// Take the nearest 8 entries (8 × 3 hours = 24 hours) for the line chart
 export function getNext24Hours(list: ForecastItem[]): ForecastItem[] {
   return list.slice(0, 8);
 }
 
-// Change the UTC dt time stamp to the "HH:00" format of the city's local time, used for the chart's X-axis
+// Convert a UTC dt timestamp to "HH:00" format in the city's local time, used for the chart X-axis
 export function formatHour(utcDt: number, timezoneOffsetSeconds: number): string {
   const localDate = toLocalDate(utcDt, timezoneOffsetSeconds);
   const hours = localDate.getUTCHours().toString().padStart(2, "0");
   return `${hours}:00`;
 }
 
-// Change the UTC dt time stamp to the "Fri, 25 Sep" format of the city's local date
-export function formatDate(utcDt: number, timezoneOffsetSeconds: number): string {
+// Convert a UTC dt timestamp to the city's local weekday abbreviation, e.g. "Tue"
+export function formatWeekday(utcDt: number, timezoneOffsetSeconds: number): string {
   const localDate = toLocalDate(utcDt, timezoneOffsetSeconds);
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  const weekday = weekdays[localDate.getUTCDay()];
-  const day = localDate.getUTCDate();
-  const month = months[localDate.getUTCMonth()];
-
-  return `${weekday}, ${day} ${month}`;
+  return weekdays[localDate.getUTCDay()];
 }
 
-// Calculate the "current local time" of the city, accurate to the minute
-// Principle: dt is the unix timestamp of UTC, and timezone is the offset in seconds from the city to UTC
-// Adding them together gives the unix timestamp corresponding to the "local time" of the city
+// Convert a UTC dt timestamp to the city's local date, e.g. "27 Sep"
+export function formatDayMonth(utcDt: number, timezoneOffsetSeconds: number): string {
+  const localDate = toLocalDate(utcDt, timezoneOffsetSeconds);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = localDate.getUTCDate();
+  const month = months[localDate.getUTCMonth()];
+  return `${day} ${month}`;
+}
+
+// Calculate the city's current local time, accurate to the minute
+// Principle: dt is the UTC unix timestamp (seconds); timezone is the city's offset from UTC in seconds
+// Adding them together gives the unix timestamp that corresponds to the city's local time
 export function getLocalTime(weather: WeatherData): string {
   const localMillis = (weather.dt + weather.timezone) * 1000;
   const localDate = new Date(localMillis);
 
-  // Key: Use UTC method to read, not local method
+  // Key: use UTC methods to read the time, not local methods
   // Because localMillis is already an "adjusted fake timestamp",
-  // If getHours()/getMinutes() (local method) is used,
-  // It will be converted again by the user's computer's time zone, and the number will be wrong
+  // using getHours()/getMinutes() (local methods) would apply the user's
+  // computer timezone on top of it a second time, giving wrong results
   const hours = localDate.getUTCHours().toString().padStart(2, "0");
   const minutes = localDate.getUTCMinutes().toString().padStart(2, "0");
 
   return `${hours}:${minutes}`;
 }
 
-// Change timezone offset seconds to human-readable format like "GMT+8"
-// Also handles non-integer time zones like India UTC+5:30
+// Convert timezone offset seconds to a human-readable label like "GMT+8"
+// Also handles non-integer-hour timezones like India (UTC+5:30)
 export function getGmtLabel(timezoneOffsetSeconds: number): string {
   const hours = timezoneOffsetSeconds / 3600;
   const sign = hours >= 0 ? "+" : "";
@@ -113,8 +122,8 @@ export function getGmtLabel(timezoneOffsetSeconds: number): string {
   }
 }
 
-// OpenWeatherMap's AQI is a proprietary 1-5 rating system, not a universal 0-500 scale
-// Here, the number is converted to the corresponding text label
+// OpenWeatherMap's AQI uses a proprietary 1-5 scale, not the universal 0-500 scale
+// This converts the numeric index to a human-readable text label
 const AQI_LABELS: Record<1 | 2 | 3 | 4 | 5, string> = {
   1: "Good",
   2: "Fair",
@@ -128,28 +137,26 @@ export function getAqiLabel(aqi: 1 | 2 | 3 | 4 | 5 | null): string {
   return AQI_LABELS[aqi];
 }
 
-// Convert wind direction from degrees (0-360) to compass notation like "N 9.3° E"
-// Rule: First determine whether it is North or South
-// Then calculate how many degrees away from the North/South
-// Finally determine whether it is East or West
+// Convert wind direction in degrees (0-360) to meteorological compass notation like "N 9.3° E"
+// Rule: first determine North (N) or South (S), then calculate degrees from the pole, then East (E) or West (W)
 export function formatWindDirection(deg: number): string {
-  // Limit the angle to the range of 0-360 to prevent the API from occasionally giving values above 360 or negative boundary values
+  // Clamp the angle to 0-360 to guard against occasional out-of-range values from the API
   const normalizedDeg = ((deg % 360) + 360) % 360;
- 
+
   let ns: "N" | "S";
   let angleFromPole: number;
- 
+
   if (normalizedDeg <= 90 || normalizedDeg >= 270) {
-    // 0-90 degrees or 270-360 degrees, all are in the "North" range
+    // 0-90° or 270-360° are all in the "northward" range
     ns = "N";
     angleFromPole = normalizedDeg <= 90 ? normalizedDeg : 360 - normalizedDeg;
   } else {
-    // Between 90-270 degrees, it is in the "South" range
+    // 90-270° is in the "southward" range
     ns = "S";
     angleFromPole = 180 - normalizedDeg;
   }
- 
+
   const ew: "E" | "W" = normalizedDeg <= 180 ? "E" : "W";
- 
-  return `${ns} ${Math.abs(angleFromPole).toFixed(1)}° ${ew}`;
+
+  return `${ns} ${Math.abs(angleFromPole).toFixed(1)}°${ew}`;
 }

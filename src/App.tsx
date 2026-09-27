@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import './App.css'
 
 import type { WeatherData, ForecastData, ForecastItem, AirPollutionData } from './types/weather'
+import type { DailyForecast } from './utils/weatherHelpers'
 import { getDailyForecasts, getNext24Hours } from './utils/weatherHelpers'
 import { CurrentWeatherCard } from './components/CurrentWeatherCard'
 import { ForecastList } from './components/ForecastList'
@@ -21,7 +22,7 @@ function App() {
   const [inputValue, setInputValue] = useState<string>("Kuala Lumpur");
  
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [forecast, setForecast] = useState<ForecastItem[]>([]);
+  const [forecast, setForecast] = useState<DailyForecast[]>([]);
   const [hourlyData, setHourlyData] = useState<ForecastItem[]>([]);
   const [aqi, setAqi] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
  
@@ -182,14 +183,18 @@ function App() {
               <h1>{weather.name}, {weather.sys.country}</h1>
             </div>
             <div className="today-wrapper">
-              <h2 className="today-title">Today's Weather</h2>
+              <h2 className="today-title">Today's Report</h2>
               <div className="today-grid">
                 <CurrentWeatherCard weather={weather} aqi={aqi} />
-                {hourlyData.length > 0 && <HourlyChart items={hourlyData} timezone={weather.timezone} />}
+                <div className="today-grid_right-column">
+                  {hourlyData.length > 0 && <HourlyChart items={hourlyData} timezone={weather.timezone} />}
+                  <div className="forecast-container">
+                    <p className="forecast-title">Next 5 Days Forecast</p>
+                    {forecast.length > 0 && <ForecastList items={forecast} timezone={weather.timezone} />}
+                  </div>
+                </div>
               </div>
-              {forecast.length > 0 && <ForecastList items={forecast} timezone={weather.timezone} />}
             </div>
-            
           </>
         )}
       </div>

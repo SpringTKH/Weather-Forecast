@@ -6,6 +6,7 @@ interface HourlyChartProps {
   timezone: number;
 }
 
+// Convert a set of (x, y) coordinate points into a smooth Bézier curve SVG path string
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length < 2) return "";
 
@@ -30,23 +31,21 @@ function buildSmoothPath(points: { x: number; y: number }[]): string {
 
 export function HourlyChart({ items, timezone }: HourlyChartProps) {
   const svgWidth = 700;
-  const svgHeight = 280;
-  // Horizontal inset so edge points/labels are never clipped by the viewBox boundary.
-  // The info-row items are absolutely positioned using the same x% → perfect alignment.
-  const svgPaddingX = 40;
-  const paddingTop = 55;
-  const paddingBottom = 20;
+  const svgHeight = 140;
+  const paddingTop = 36;
+  const paddingBottom = 16;
+  const paddingX = 30; // Horizontal inset so the first/last label is never clipped by the SVG viewBox boundary
 
   const temps = items.map((item) => item.main.temp);
   const maxTemp = Math.max(...temps);
   const minTemp = Math.min(...temps);
   const tempRange = maxTemp - minTemp || 1;
 
-  // Data runs from x=svgPaddingX to x=svgWidth-svgPaddingX (inset from both edges)
-  const stepX = (svgWidth - 2 * svgPaddingX) / (items.length - 1);
+  const usableWidth = svgWidth - paddingX * 2; // The actual width used to distribute data points
+  const stepX = usableWidth / (items.length - 1);
 
   const points = items.map((item, index) => {
-    const x = svgPaddingX + index * stepX;
+    const x = paddingX + index * stepX; // Shift each point right by paddingX so it no longer touches the left edge
     const normalizedTemp = (item.main.temp - minTemp) / tempRange;
     const y = paddingTop + (1 - normalizedTemp) * (svgHeight - paddingTop - paddingBottom);
     return { x, y, temp: item.main.temp };
@@ -54,59 +53,74 @@ export function HourlyChart({ items, timezone }: HourlyChartProps) {
 
   const pathData = buildSmoothPath(points);
 
+  // Generate y-coordinates for a few evenly-spaced horizontal grid lines within the drawable area
+  const gridLineCount = 4;
+  const drawableTop = paddingTop;
+  const drawableBottom = svgHeight - paddingBottom;
+  const gridLines = Array.from({ length: gridLineCount }, (_, i) => {
+    return drawableTop + (i / (gridLineCount - 1)) * (drawableBottom - drawableTop);
+  });
+
   return (
     <div className="hourly-chart">
       <p className="hourly-chart_title">24-hours Forecast</p>
 
       <div className="hourly-chart_scroll">
-        <div className="hourly-chart_chart-area">
-          <svg
-            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-            preserveAspectRatio="none"
-            className="hourly-chart_svg"
-          >
-            {/* Temp labels inside SVG — scale correctly with viewBox */}
-            {points.map((p, i) => (
+        <svg
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          preserveAspectRatio="xMidYMid meet"
+          className="hourly-chart_svg"
+        >
+          {/* Background grid lines, drawn at the bottom layer, spanning the full width (including paddingX on both sides) */}
+          {gridLines.map((y, i) => (
+            <line
+              key={`grid-${i}`}
+              x1={0}
+              y1={y}
+              x2={svgWidth}
+              y2={y}
+              stroke="#e5e5e5"
+              strokeWidth="1"
+            />
+          ))}
+
+          <path
+            d={pathData}
+            fill="none"
+            stroke="#e08a3e"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+
+          {points.map((p, i) => (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r="4" fill="#e08a3e" />
+              {/* Temperature labels are drawn directly inside the SVG, so they always follow the dot's position and can never be misaligned or clipped by external CSS */}
               <text
-                key={i}
                 x={p.x}
-                y={paddingTop - 12}
-                textAnchor="middle"
-                fontSize="22"
+                y={p.y - 14} // Fixed 14px above the dot, maintaining this relative distance regardless of dot position
+                textAnchor="middle" // Center the text horizontally around the x-coordinate of the dot
+                fontSize="18"
                 fontWeight="bold"
                 fill="#333"
               >
-                {Math.round(p.temp)}°
+                {Math.round(p.temp)}°C
               </text>
-            ))}
+            </g>
+          ))}
+        </svg>
 
-            <path
-              d={pathData}
-              fill="none"
-              stroke="#e08a3e"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            {points.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r="6" fill="#e08a3e" />
-            ))}
-          </svg>
-        </div>
-
-        {/* Info row: each item is absolutely positioned at the exact x% of its SVG point */}
+        {/* Info row below: weather icon + time, laid out horizontally */}
         <div className="hourly-chart_info-row">
           {items.map((item, i) => (
-            <div
-              key={i}
-              className="hourly-chart_info-item"
-              style={{ left: `${(points[i].x / svgWidth) * 100}%` }}
-            >
+            <div key={i} className="hourly-chart_info-item">
               <img
                 src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`}
                 alt={item.weather[0].description}
                 className="hourly-chart_icon"
               />
               <span className="hourly-chart_time">{formatHour(item.dt, timezone)}</span>
+              <span className="hourly-chart_wind">{item.wind.speed.toFixed(1)} m/s</span>
             </div>
           ))}
         </div>
@@ -114,4 +128,3 @@ export function HourlyChart({ items, timezone }: HourlyChartProps) {
     </div>
   );
 }
-

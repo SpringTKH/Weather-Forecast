@@ -50,6 +50,11 @@ export interface ForecastItem {
     description: string;
     icon: string;
   }[];
+  wind: {
+    speed: number;
+    deg: number;
+    gust?: number;
+  };
 }
 
 export interface ForecastData {
@@ -57,7 +62,7 @@ export interface ForecastData {
   city: {
     name: string;
     country: string;
-    timezone: number; // 该城市相对UTC的偏移秒数，跟 WeatherData 的 timezone 同一个概念
+    timezone: number; // UTC offset in seconds for the city — same concept as WeatherData's timezone field
   };
 }
 

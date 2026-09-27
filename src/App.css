@@ -3,15 +3,8 @@
 }
 
 /* ────────────────────
-   Header：横跨整个浏览器宽度的渐变天空背景
+   Header: full-width gradient sky background spanning the entire browser width
    ──────────────────── */
-
-/*.app_header {
-  width: 100%;
-  background: linear-gradient(135deg, #fcd3c1 0%, #e8b8d4 30%, #8b93d4 70%, #3d4a8a 100%);
-  padding: 100px 20px 50px;
-  text-align: center;
-}*/
 
 .app_header {
   width: 100%;
@@ -163,6 +156,7 @@
   max-width: 100%;
   font-family: 'Jost', sans-serif;
   letter-spacing: -0.5px;
+  background-color: #777;
 }
 
 .loading-message {
@@ -185,8 +179,14 @@
   display: grid;
   grid-template-columns: 1fr 1.3fr;
   gap: 20px;
-  align-items: stretch;  /* 两栏自动等高，取较高者为准 */
+  align-items: stretch;  /* Changed from start to stretch, so both columns automatically stretch to the same height */
   margin-bottom: 24px;
+}
+
+.today-grid_right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .city-name {
@@ -197,6 +197,7 @@
   padding: 5px 0;
   font-family: 'Sen';
   letter-spacing: -2px;
+  background-color: #ffffff;
 }
 
 .today-title {
@@ -220,8 +221,8 @@
   border-radius: 16px;
   padding: 50px 25px 40px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  box-sizing: border-box; /* padding 不撑破高度 */
-  height: 100%;           /* 撑满 grid 格子 */
+  box-sizing: border-box; /* Padding does not expand the height */
+  height: 100%;           /* Fill the grid cell */
 }
 
 .weather-card_header {
@@ -245,18 +246,18 @@
 /* ── Body: temp + description (left) | icon (right) ── */
 .weather-card_body {
   display: grid;
-  grid-template-columns: 1fr auto; /* left: 文字；right: 图片 */
-  grid-template-rows: auto auto;   /* row1: temp；row2: description */
+  grid-template-columns: 1fr auto; /* left: text; right: image */
+  grid-template-rows: auto auto;   /* row1: temp; row2: description */
   margin: 0px 25px 10px;
 }
 
 .weather-card_icon {
   grid-column: 2;
-  grid-row: 1 / 3;       /* 跨 row1 + row2，高度 = temp + description 总和 */
-  align-self: center;   /* 撑满格子高度 */
+  grid-row: 1 / 3;       /* Spans row1 + row2; height = temp + description combined */
+  align-self: center;   /* Stretch to fill the cell height */
   width: 120px;
   height: 100%;
-  object-fit: contain;   /* 图片等比缩放，不变形 */
+  object-fit: contain;   /* Scale image proportionally without distortion */
 }
 
 .weather-card_temp {
@@ -277,7 +278,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);  /* 3 columns */
   grid-template-rows: repeat(2, 1fr);      /* 2 rows */
-  gap: 0px 5px;
+  gap: 5px 10px;
   padding-top: 15px;
 }
 
@@ -285,7 +286,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Size fixed，ensure each cell is the same size, not affected by content length */
+  /* Size fixed, ensure each cell is the same size, not affected by content length */
   min-height: 100px;
   justify-content: flex-start;
   padding: 10px 0;
@@ -311,119 +312,146 @@
   margin-top: -1px;
 }
 
-/* ── Outer container: fills grid cell, centers content vertically ── */
 .hourly-chart {
   background: white;
   border-radius: 16px;
-  padding: 20px 32px;
+  padding: 16px 16px 25px;
+  height: fit-content;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
-  height: 100%;            /* fills the today-grid cell */
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* centers the group (title + scroll) vertically */
 }
 
 .hourly-chart_title {
-  font-size: 30px;
-  color: #888;
-  margin: 0 25px 12px 25px;
-  flex-shrink: 0;          /* title never shrinks */
+  font-family: 'Jost', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #666;
+  margin: 5px 3% -5px;
 }
 
-/* ── Scrollable area: takes 80% of the outer container height ── */
 .hourly-chart_scroll {
-  overflow-x: auto;
-  flex: 0 0 70%;           /* occupies exactly 80% of .hourly-chart height */
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── Chart area: SVG fills the entire area (temp labels are now inside SVG) ── */
-.hourly-chart_chart-area {
-  flex: 1;
-  min-height: 0;
+  overflow-x: auto; /* Allows horizontal scrolling when there are many data points and space is limited */
 }
 
 .hourly-chart_svg {
   width: 100%;
-  height: 100%;   /* fills chart-area; svgHeight=280 in viewBox matches display ratio */
+  height: 110px;
   display: block;
 }
 
-
-
-/* ── Info row: absolutely-positioned items aligned to SVG point x% ── */
+/* Info row below the chart: match the SVG aspect ratio to keep alignment consistent.
+   The 700:140 ratio with height:110px means the SVG renders at ~550px wide.
+   (110 / 140 * 700 ≈ 550) — capping info-row at the same max-width keeps icons aligned with dots */
 .hourly-chart_info-row {
-  position: relative;      /* anchor for absolutely-positioned items */
-  height: 58px;            /* icon 32px + time ~14px + gap 2px + padding */
-  flex-shrink: 0;
-  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 5px auto 0;
+  max-width: 550px;
 }
 
 .hourly-chart_info-item {
-  position: absolute;
-  transform: translateX(-50%); /* center item on the SVG x-coordinate */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  min-width: 50px;
 }
 
 .hourly-chart_icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: auto;
 }
 
 .hourly-chart_time {
-  font-size: 12px;
+  font-size: 15px;
   color: #666;
+  margin-top: -10px;
+}
+
+.hourly-chart_wind {
+  font-size: 12px;
+  color: #888;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  margin: -4px 0 0 0;
 }
 
 /* ────────────────────
    Forecast List (5-day row)
    ──────────────────── */
 
+.forecast-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;  /* Allow this block to automatically fill the remaining space in the right column, matching the total height of the left side */
+  background-color: #fff;
+  padding: 16px 16px 20px;
+  border-radius: 16px;
+}
+
+.forecast-title {
+  font-family: 'Jost', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #666;
+  margin: 5px 3% 0;
+}
+
 .forecast-list {
   display: flex;
-  gap: 10px;
   overflow-x: auto; /* In case the space isn't enough, it will allow horizontal scrolling */
-  margin-top: 20px;
-  padding: 4px;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 0px 12px;
 }
  
 .forecast-card {
   flex: 1;
   min-width: 80px;
-  background: #f5f7fa;
-  border-radius: 12px;
-  padding: 12px 8px;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
- 
-.forecast-card_date {
-  font-size: 12px;
-  font-weight: bold;
-  color: #555;
+
+.forecast-card_weekday {
+  font-size: 23px;
+  font-weight: 600;
+  margin: 0 0 -8px 0;
+}
+
+.forecast-card_day-month {
+  font-size: 13px;
+  color: #6a6a6a;
   margin: 0 0 6px 0;
 }
  
 .forecast-card_icon {
-  width: 40px;
-  height: 40px;
+  width: 55px;
+  height: auto;
 }
- 
-.forecast-card_temp {
-  font-size: 16px;
+
+.forecast-card_temp-range {
+  font-size: 22px;
   font-weight: bold;
-  margin: 4px 0;
 }
- 
+
+.forecast-card_temp-max {
+  color: #d9534f; /* Red tone — represents the daily high temperature */
+  margin-top: -30px;
+}
+
+.forecast-card_temp-min {
+  color: #326499; /* Blue tone — represents the daily low temperature, matching the main color of the weather card on the left */
+  margin-top: -10px;
+}
+
 .forecast-card_description {
-  font-size: 11px;
-  color: #777;
+  font-size: 15px;
+  color: #6c6c6c;
   text-transform: capitalize;
+  margin: -20px 0 0 0;
+}
+
+.forecast-card_wind {
+  font-size: 13px;
+  color: #999;
   margin: 0;
 }

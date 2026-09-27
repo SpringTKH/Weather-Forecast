@@ -1,11 +1,16 @@
-import type { ForecastItem } from "../types/weather";
+import type { DailyForecast } from "../utils/weatherHelpers";
 import { ForecastCard } from "./ForecastCard";
 
-export function ForecastList({ items, timezone }: { items: ForecastItem[]; timezone: number }) {
+interface ForecastListProps {
+  items: DailyForecast[];
+  timezone: number;
+}
+
+export function ForecastList({ items, timezone }: ForecastListProps) {
   return (
     <div className="forecast-list">
-      {items.map((item) => (
-        <ForecastCard key={item.dt} item={item} timezone={timezone} />
+      {items.map((daily) => (
+        <ForecastCard key={daily.representative.dt} daily={daily} timezone={timezone} />
       ))}
     </div>
   );
