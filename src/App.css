@@ -187,6 +187,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 .city-name {
@@ -223,6 +224,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   box-sizing: border-box; /* Padding does not expand the height */
   height: 100%;           /* Fill the grid cell */
+  min-width: 0;
 }
 
 .weather-card_header {
@@ -249,6 +251,7 @@
   grid-template-columns: 1fr auto; /* left: text; right: image */
   grid-template-rows: auto auto;   /* row1: temp; row2: description */
   margin: 0px 25px 10px;
+  min-width: 0;
 }
 
 .weather-card_icon {
@@ -280,6 +283,7 @@
   grid-template-rows: repeat(2, 1fr);      /* 2 rows */
   gap: 5px 10px;
   padding-top: 15px;
+  min-width: 0;
 }
 
 .weather-card_detail-item {
@@ -290,6 +294,7 @@
   min-height: 100px;
   justify-content: flex-start;
   padding: 10px 0;
+  text-align: center;
 }
 
 /* united size of icon wrapper, to make sure the icon are aligned */
@@ -318,6 +323,7 @@
   padding: 16px 16px 25px;
   height: fit-content;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  min-width: 0;
 }
 
 .hourly-chart_title {
@@ -387,6 +393,7 @@
   background-color: #fff;
   padding: 16px 16px 20px;
   border-radius: 16px;
+  min-width: 0;
 }
 
 .forecast-title {
@@ -454,4 +461,153 @@
   font-size: 13px;
   color: #999;
   margin: 0;
+}
+
+/* ════════════════════════════════════════
+   Responsive breakpoint: 768px and below (mobile / narrow screens)
+   ════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 1. Shrink the header title to prevent overflow */
+  .app_header {
+    padding-top: 50px;
+  }
+  
+  .app_title {
+    font-size: 45px;
+    margin-bottom: 20px;
+  }
+
+  .app_subtitle {
+    font-size: 17px;
+  }
+
+  .city-name {
+    font-size: 22px;
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .search-bar {
+    max-width: 85%; /* Allow the search bar to fill the available width on narrow screens instead of using a rigid fixed width */
+  }
+
+  /* 2. Switch today-grid from 2 columns to 1 column, stacking vertically */
+  .today-grid {
+    grid-template-columns: 1fr; /* Changed from "1fr 1.3fr" to a single column */
+  }
+  
+  .weather-card_body {
+    padding: 0 5%
+  }
+
+  .weather-card_local-time,
+  .weather-card_header {
+    max-width: fit-content;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  /* 3. Change the 6-cell grid from 3 columns to 2 columns to avoid overcrowding */
+  .weather-card_details {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr); /* 2 columns × 3 rows = same 6 cells, just arranged differently */
+  }
+
+  /* 4. HourlyChart: enable horizontal scrolling on narrow screens instead of squeezing all data points */
+  .hourly-chart_scroll {
+    overflow-x: auto;
+  }
+
+  .hourly-chart_svg {
+    width: 600px;
+  }
+
+  .hourly-chart_info-row {
+    width: 600px;
+    padding: 0 22px;
+  }
+
+  .hourly-chart_icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .hourly-chart_time,
+  .hourly-chart_wind {
+    font-size: 10px;
+  }
+
+  .hourly-chart_title,
+  .forecast-title {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  /* 5. Shrink the minimum width of 5-day forecast cards so more cards fit on mobile without excessive scrolling */
+  .forecast-card {
+    min-width: 70px;
+    padding: 10px 6px;
+  }
+
+  .hourly-chart_info-row {
+    width: 600px;    /* Match the exact same value used by the SVG */
+    max-width: none; /* Remove the desktop 550px cap to avoid conflicts */
+    min-width: 600px;
+  }
+
+  .hourly-chart_svg,
+  .hourly-chart_info-row {
+    margin: 0 auto;
+  }
+
+  .forecast-card_description {
+    min-height: 50px; /* Fixed height equivalent to two lines of text, so all cards take the same space regardless of line count */
+    display: flex;
+    align-items: center; /* Vertically center the text within this fixed height */
+    justify-content: center;
+  }
+}
+
+/* ════════════════════════════════════════
+   Narrower breakpoint: 480px and below (small phones)
+   ════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .app_title {
+    font-size: 35px;
+  }
+
+  .city-name {
+    font-size: 20px;
+  }
+
+  .today-title {
+    font-size: 27px;
+  }
+
+  /* On very narrow screens, revert the 6-cell grid to a single column to prevent text from being squeezed */
+  .weather-card_details {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 12px 6px;
+  }
+
+  .hourly-chart_info-row {
+    width: 600px;
+    padding: 0 22px;
+  }
+
+  .weather-card_temp {
+    font-size: 50px; /* Reduced from the original 60px to save space on small screens */
+    margin-bottom: -10px;
+  }
+
+  .weather-card_icon {
+    margin-right: -35px;
+  }
+
+  .weather-card_description {
+    font-size: 18px;
+    margin-top: 0;
+  }
 }
