@@ -21,7 +21,7 @@ A responsive weather dashboard built with **React + TypeScript + Vite**, powered
 ## 🛠️ Tech Stack
 
 | Category    | Technology                                                      |
-|-------------|-----------------------------------------------------------------|
+| ----------- | --------------------------------------------------------------- |
 | Framework   | React 19                                                        |
 | Language    | TypeScript 6                                                    |
 | Build Tool  | Vite 8                                                          |
@@ -39,8 +39,8 @@ A responsive weather dashboard built with **React + TypeScript + Vite**, powered
 ```
 weather-forecast/
 ├── public/
-│   ├── favicon.svg
-│   └── icons.svg
+│   ├── Background.jpg
+│   └── headerBackground.png
 ├── src/
 │   ├── components/
 │   │   ├── CurrentWeatherCard.tsx  # Weather card: temp, wind, pressure, humidity, AQI (with lucide icons)
@@ -73,8 +73,8 @@ weather-forecast/
 ```ts
 interface DailyForecast {
   representative: ForecastItem; // Entry closest to noon — used for icon, description, and time
-  maxTemp: number;              // True daily high from all entries that day
-  minTemp: number;              // True daily low from all entries that day
+  maxTemp: number; // True daily high from all entries that day
+  minTemp: number; // True daily low from all entries that day
 }
 ```
 
@@ -82,18 +82,38 @@ interface DailyForecast {
 
 ### Helper Functions
 
-| Function | Description |
-|---|---|
-| toLocalDate(utcDt, offset) | (private) Converts a UTC unix timestamp into a Date adjusted for the city's timezone offset |
+| Function                        | Description                                                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| toLocalDate(utcDt, offset)      | (private) Converts a UTC unix timestamp into a Date adjusted for the city's timezone offset                                                 |
 | getDailyForecasts(list, offset) | Groups all 40 forecast entries by local date; returns up to 5 DailyForecast objects, each with a representative entry + true daily high/low |
-| getNext24Hours(list) | Returns the first 8 forecast entries (8 x 3h = 24h) for the hourly chart |
-| formatHour(utcDt, offset) | Formats a UTC timestamp as "HH:00" in the city's local time (e.g. "14:00") |
-| formatWeekday(utcDt, offset) | Formats a UTC timestamp as a weekday abbreviation in the city's local time (e.g. "Tue") |
-| formatDayMonth(utcDt, offset) | Formats a UTC timestamp as a day-month string in the city's local date (e.g. "27 Sep") |
-| getLocalTime(weather) | Returns the city's current local time as "HH:MM" for the weather card header |
-| getGmtLabel(offset) | Converts offset seconds to a readable label like "GMT+8" or "GMT+5:30" |
-| formatWindDirection(deg) | Converts wind degrees (0-360) to compass notation, e.g. "N 45.0 E" |
-| getAqiLabel(aqi) | Converts AQI index (1-5) to a text label: Good, Fair, Moderate, Poor, Very Poor |
+| getNext24Hours(list)            | Returns the first 8 forecast entries (8 x 3h = 24h) for the hourly chart                                                                    |
+| formatHour(utcDt, offset)       | Formats a UTC timestamp as "HH:00" in the city's local time (e.g. "14:00")                                                                  |
+| formatWeekday(utcDt, offset)    | Formats a UTC timestamp as a weekday abbreviation in the city's local time (e.g. "Tue")                                                     |
+| formatDayMonth(utcDt, offset)   | Formats a UTC timestamp as a day-month string in the city's local date (e.g. "27 Sep")                                                      |
+| getLocalTime(weather)           | Returns the city's current local time as "HH:MM" for the weather card header                                                                |
+| getGmtLabel(offset)             | Converts offset seconds to a readable label like "GMT+8" or "GMT+5:30"                                                                      |
+| formatWindDirection(deg)        | Converts wind degrees (0-360) to compass notation, e.g. "N 45.0° E"                                                                         |
+| getAqiLabel(aqi)                | Converts AQI index (1-5) to a text label: Good, Fair, Moderate, Poor, Very Poor                                                             |
+
+---
+
+## ⚠️ Known Limitations
+
+- **3-hour forecast granularity**
+
+  The free OpenWeatherMap plan provides data every 3 hours, so the "24-hour" chart shows 8 data points rather than hourly readings.
+
+- **Partial first day**
+
+  The 5-day forecast starts from the query time, so today's high/low only reflects the remaining time slots.
+
+- **Regional data**
+
+  Conditions are aggregated from regional stations and models, and may differ from what you see locally.
+
+- **API key visibility**
+
+  As a client-side-only app, the API key is bundled into the frontend (free-tier key, rate-limited). A production version would proxy requests through a backend.
 
 ---
 
@@ -107,12 +127,14 @@ interface DailyForecast {
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/SpringTKH/Weather-Forecast.git
    cd Weather-Forecast
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -120,11 +142,13 @@ interface DailyForecast {
 3. **Set up your API key**
 
    Create a `.env` file in the project root:
+
    ```env
    VITE_OPENWEATHER_API_KEY=your_api_key_here
    ```
 
 4. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -135,20 +159,20 @@ interface DailyForecast {
 
 ## 📦 Available Scripts
 
-| Script            | Description                        |
-|-------------------|------------------------------------|
-| npm run dev       | Start the local development server |
-| npm run build     | Build the production bundle        |
-| npm run preview   | Preview the production build       |
-| npm run lint      | Run ESLint checks                  |
+| Script          | Description                        |
+| --------------- | ---------------------------------- |
+| npm run dev     | Start the local development server |
+| npm run build   | Build the production bundle        |
+| npm run preview | Preview the production build       |
+| npm run lint    | Run ESLint checks                  |
 
 ---
 
 ## 🔑 Environment Variables
 
-| Variable                   | Description                 |
-|----------------------------|-----------------------------|
-| VITE_OPENWEATHER_API_KEY   | Your OpenWeatherMap API key |
+| Variable                 | Description                 |
+| ------------------------ | --------------------------- |
+| VITE_OPENWEATHER_API_KEY | Your OpenWeatherMap API key |
 
 > Never commit your .env file. It is already listed in .gitignore.
 
@@ -158,8 +182,8 @@ interface DailyForecast {
 
 This project uses three endpoints from the [OpenWeatherMap API](https://openweathermap.org/api):
 
-| Endpoint | Usage |
-|---|---|
-| GET /data/2.5/weather?q={city}&units=metric | Current weather conditions (temp, wind, pressure, humidity, coords, timezone) |
-| GET /data/2.5/forecast?q={city}&units=metric | 5-day / 3-hour forecast — used for both the 24h chart and 5-day cards |
+| Endpoint                                        | Usage                                                                           |
+| ----------------------------------------------- | ------------------------------------------------------------------------------- |
+| GET /data/2.5/weather?q={city}&units=metric     | Current weather conditions (temp, wind, pressure, humidity, coords, timezone)   |
+| GET /data/2.5/forecast?q={city}&units=metric    | 5-day / 3-hour forecast — used for both the 24h chart and 5-day cards           |
 | GET /data/2.5/air_pollution?lat={lat}&lon={lon} | Air Quality Index by coordinates (fetched after current weather returns coords) |
