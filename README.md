@@ -2,6 +2,8 @@
 
 A responsive weather dashboard built with **React + TypeScript + Vite**, powered by the [OpenWeatherMap API](https://openweathermap.org/api). Search for any city worldwide to get real-time weather conditions, a 24-hour temperature chart, and a 5-day forecast — all displayed in the **city's own local timezone**.
 
+[To view the live demonstration on Vercel, click here.](https://weather-forecast-sigma-drab.vercel.app/)
+
 ---
 
 ## ✨ Features
@@ -111,9 +113,9 @@ interface DailyForecast {
 
   Conditions are aggregated from regional stations and models, and may differ from what you see locally.
 
-- **API key visibility**
+- **API key exposure**
 
-  As a client-side-only app, the API key is bundled into the frontend (free-tier key, rate-limited). A production version would proxy requests through a backend.
+  As a client-side-only app, the OpenWeatherMap key is bundled into the frontend and visible in the browser. This deployment uses a dedicated, rate-limited free-tier key; a production version would proxy requests through a backend so the key stays server-side.
 
 ---
 
