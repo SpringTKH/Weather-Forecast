@@ -66,63 +66,65 @@ export function HourlyChart({ items, timezone }: HourlyChartProps) {
       <p className="hourly-chart_title">24-hours Forecast</p>
 
       <div className="hourly-chart_scroll">
-        <svg
-          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="hourly-chart_svg"
-        >
-          {/* Background grid lines, drawn at the bottom layer, spanning the full width (including paddingX on both sides) */}
-          {gridLines.map((y, i) => (
-            <line
-              key={`grid-${i}`}
-              x1={0}
-              y1={y}
-              x2={svgWidth}
-              y2={y}
-              stroke="#e5e5e5"
-              strokeWidth="1"
-            />
-          ))}
-
-          <path
-            d={pathData}
-            fill="none"
-            stroke="#e08a3e"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-
-          {points.map((p, i) => (
-            <g key={i}>
-              <circle cx={p.x} cy={p.y} r="4" fill="#e08a3e" />
-              {/* Temperature labels are drawn directly inside the SVG, so they always follow the dot's position and can never be misaligned or clipped by external CSS */}
-              <text
-                x={p.x}
-                y={p.y - 14} // Fixed 14px above the dot, maintaining this relative distance regardless of dot position
-                textAnchor="middle" // Center the text horizontally around the x-coordinate of the dot
-                fontSize="18"
-                fontWeight="bold"
-                fill="#333"
-              >
-                {Math.round(p.temp)}°C
-              </text>
-            </g>
-          ))}
-        </svg>
-
-        {/* Info row below: weather icon + time, laid out horizontally */}
-        <div className="hourly-chart_info-row">
-          {items.map((item, i) => (
-            <div key={i} className="hourly-chart_info-item">
-              <img
-                src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`}
-                alt={item.weather[0].description}
-                className="hourly-chart_icon"
+        <div className="hourly-chart_content">
+          <svg
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            preserveAspectRatio="xMidYMid meet"
+            className="hourly-chart_svg"
+          >
+            {/* Background grid lines, drawn at the bottom layer, spanning the full width (including paddingX on both sides) */}
+            {gridLines.map((y, i) => (
+              <line
+                key={`grid-${i}`}
+                x1={0}
+                y1={y}
+                x2={svgWidth}
+                y2={y}
+                stroke="#e5e5e5"
+                strokeWidth="1"
               />
-              <span className="hourly-chart_time">{formatHour(item.dt, timezone)}</span>
-              <span className="hourly-chart_wind">{item.wind.speed.toFixed(1)} m/s</span>
-            </div>
-          ))}
+            ))}
+
+            <path
+              d={pathData}
+              fill="none"
+              stroke="#e08a3e"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+
+            {points.map((p, i) => (
+              <g key={i}>
+                <circle cx={p.x} cy={p.y} r="4" fill="#e08a3e" />
+                {/* Temperature labels are drawn directly inside the SVG, so they always follow the dot's position and can never be misaligned or clipped by external CSS */}
+                <text
+                  x={p.x}
+                  y={p.y - 14} // Fixed 14px above the dot, maintaining this relative distance regardless of dot position
+                  textAnchor="middle" // Center the text horizontally around the x-coordinate of the dot
+                  fontSize="18"
+                  fontWeight="bold"
+                  fill="#333"
+                >
+                  {Math.round(p.temp)}°C
+                </text>
+              </g>
+            ))}
+          </svg>
+
+          {/* Info row below: weather icon + time, laid out horizontally */}
+          <div className="hourly-chart_info-row">
+            {items.map((item, i) => (
+              <div key={i} className="hourly-chart_info-item">
+                <img
+                  src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`}
+                  alt={item.weather[0].description}
+                  className="hourly-chart_icon"
+                />
+                <span className="hourly-chart_time">{formatHour(item.dt, timezone)}</span>
+                <span className="hourly-chart_wind">{item.wind.speed.toFixed(1)} m/s</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

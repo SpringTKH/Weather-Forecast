@@ -20,7 +20,8 @@
 
 .app_title {
   color: white;
-  font-size: 60px;
+  font-family: "Google Sans Flex", sans-serif;
+  font-size: 70px;
   font-weight: 800;
   margin: 0 0 36px 0;
   text-shadow:
@@ -186,7 +187,7 @@
 .today-grid_right-column {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -320,7 +321,7 @@
 .hourly-chart {
   background: white;
   border-radius: 16px;
-  padding: 16px 16px 25px;
+  padding: 16px 16px 30px;
   height: fit-content;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   min-width: 0;
@@ -338,6 +339,11 @@
   overflow-x: auto; /* Allows horizontal scrolling when there are many data points and space is limited */
 }
 
+.hourly-chart_content {
+  width: 600px;
+  margin: 0 auto;
+}
+
 .hourly-chart_svg {
   width: 100%;
   height: 110px;
@@ -351,8 +357,10 @@
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  margin: 5px auto 0;
-  max-width: 550px;
+  margin: 8px 0 0 0;
+  width: 100%;
+  max-width: none;
+  padding: 0 24px;
 }
 
 .hourly-chart_info-item {
@@ -519,12 +527,12 @@
     overflow-x: auto;
   }
 
-  .hourly-chart_svg {
+  .hourly-chart_content {
     width: 600px;
+    min-width: 600px;
   }
 
   .hourly-chart_info-row {
-    width: 600px;
     padding: 0 22px;
   }
 
