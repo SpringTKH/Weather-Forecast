@@ -170,7 +170,7 @@ function App() {
         />
       </header>
  
-      <div className="result-area">
+      <div >
         {isLoading && <p className="loading-message">Loading...</p>}
  
         {!isLoading && error && (
@@ -178,7 +178,7 @@ function App() {
         )}
  
         {!isLoading && !error && weather && (
-          <>
+          <div className="result-area">
             <div className="city-name">
               <h1>{weather.name}, {weather.sys.country}</h1>
             </div>
@@ -195,7 +195,15 @@ function App() {
                 </div>
               </div>
             </div>
-          </>
+          <footer className="app_footer">
+            © Weather data provided by {" "}
+            <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer">
+              OpenWeatherMap
+            </a>
+            <br/>
+            Data reflects regional observations & may differ from your local conditions.
+          </footer>
+          </div>
         )}
       </div>
     </div>

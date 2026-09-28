@@ -1,5 +1,5 @@
 import type { WeatherData } from "../types/weather";
-import { getLocalTime, getAqiLabel, getGmtLabel, formatWindDirection } from "../utils/weatherHelpers";
+import { getLocalTime, getAqiLabel, getGmtLabel, formatWindDirection, getWeatherTheme } from "../utils/weatherHelpers";
 import { Gauge, UserRound, Compass, ArrowDownToLine, Droplet, Wind } from "lucide-react";
 
 interface CurrentWeatherCardProps {
@@ -7,9 +7,12 @@ interface CurrentWeatherCardProps {
   aqi: 1 | 2 | 3 | 4 | 5 | null;
 }
 
+
+
 export function CurrentWeatherCard({ weather, aqi }: CurrentWeatherCardProps) {
+  const theme = getWeatherTheme(weather.weather[0].main, weather.weather[0].icon);
   return (
-    <div className="weather-card">
+    <div className={`weather-card weather-card--${theme}`}>
       <div className="weather-card_header">
         <div>
           <h2>Current Weather</h2>

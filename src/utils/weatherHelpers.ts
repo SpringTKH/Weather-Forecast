@@ -160,3 +160,36 @@ export function formatWindDirection(deg: number): string {
 
   return `${ns} ${Math.abs(angleFromPole).toFixed(1)}°${ew}`;
 }
+
+// 天气主题：决定 weather-card 的配色
+export type WeatherTheme =
+  | "clear-day"
+  | "clear-night"
+  | "clouds"
+  | "rain"
+  | "thunderstorm"
+  | "snow"
+  | "mist";
+ 
+// 根据 API 的天气大类 (weather[0].main) 与图标代码 (weather[0].icon，末尾 d/n 代表日夜)
+// 决定要套用哪个配色主题
+export function getWeatherTheme(main: string, icon: string): WeatherTheme {
+  const isNight = icon.endsWith("n");
+ 
+  switch (main) {
+    case "Clear":
+      return isNight ? "clear-night" : "clear-day";
+    case "Clouds":
+      return "clouds";
+    case "Rain":
+    case "Drizzle":
+      return "rain";
+    case "Thunderstorm":
+      return "thunderstorm";
+    case "Snow":
+      return "snow";
+    // Mist / Smoke / Haze / Dust / Fog / Sand / Ash / Squall / Tornado 这些大气现象统一归为「雾霾」
+    default:
+      return "mist";
+  }
+}

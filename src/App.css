@@ -8,7 +8,7 @@
 
 .app_header {
   width: 100%;
-  background-image: url('/Background.png');
+  background-image: url('/headerBackground.png');
   background-size: cover;
   /* Picture fill the whole header */
   background-position: center;
@@ -157,17 +157,44 @@
   max-width: 100%;
   font-family: 'Jost', sans-serif;
   letter-spacing: -0.5px;
-  background-color: #777;
+  position: relative; /* Required so ::before is positioned relative to this element */
+  overflow: hidden;   /* Clip the pseudo-element so blur doesn't bleed outside the boundary */
+}
+
+/* Use ::before for the background image + blur,
+   so the blur effect is isolated to the background only and does NOT affect child content */
+.result-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;             /* Fills the full width and height of .result-area */
+  z-index: 0;           /* Sits behind all content */
+  background-image: url('/Background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(6px);
+  transform: scale(1.05); /* Slightly scale up to prevent blurred edges from showing white gaps */
+}
+
+/* Ensure all direct children of .result-area sit above the blurred background */
+.result-area > * {
+  position: relative;
+  z-index: 1;
 }
 
 .loading-message {
+  font-family: "Google Sans Flex", sans-serif;
   color: #666;
   text-align: center;
 }
 
 .error-message {
+  font-family: "Google Sans Flex", sans-serif;
+  letter-spacing: -0.5px;
   color: #d93636;
   text-align: center;
+  padding: 0 25px;
+  font-size: 30px;
 }
 
 .today-wrapper {
@@ -226,6 +253,40 @@
   box-sizing: border-box; /* Padding does not expand the height */
   height: 100%;           /* Fill the grid cell */
   min-width: 0;
+}
+
+.weather-card--clear-day {
+  background: linear-gradient(-45deg, #f6a23c, #f9c869, #7ec4f0, #4a9de0);
+}
+
+/* 晴天(夜晚)：深蓝紫星空 */
+.weather-card--clear-night {
+  background: linear-gradient(-45deg, #0f1b3d, #1f2f6b, #3a4a9a, #5a5fae);
+}
+
+/* 多云：灰蓝，比默认稍微暗一点、饱和度低 */
+.weather-card--clouds {
+  background: linear-gradient(-45deg, #4d6a8f, #6b87ab, #8fa6c2, #b0c0d4);
+}
+
+/* 雨天：偏暗的灰蓝 */
+.weather-card--rain {
+  background: linear-gradient(-45deg, #2b3a52, #3d5170, #57718f, #7a93ad);
+}
+
+/* 雷雨：深紫灰 */
+.weather-card--thunderstorm {
+  background: linear-gradient(-45deg, #1d1b2e, #33304d, #4c4870, #6b678f);
+}
+
+/* 雪天：冷白偏蓝 */
+.weather-card--snow {
+  background: linear-gradient(-45deg, #7d9cc4, #a4bedb, #c8d9ea, #e4edf6);
+}
+
+/* 雾霾：暖灰 */
+.weather-card--mist {
+  background: linear-gradient(-45deg, #6f6f78, #8a8a93, #a5a5ad, #c0c0c7);
 }
 
 .weather-card_header {
@@ -469,6 +530,18 @@
   font-size: 13px;
   color: #999;
   margin: 0;
+}
+
+.app_footer {
+  font-family: 'Jost', sans-serif;
+  text-align: center;
+  font-size: 15px;
+  color: #ffffff;
+  padding: 50px 0;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.5),
+    0 0 4px rgba(255, 255, 255, 0.3),
+    0 0 6px rgba(255, 255, 255, 0.1);
 }
 
 /* ════════════════════════════════════════
