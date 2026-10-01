@@ -40,6 +40,35 @@ function App() {
   useEffect(() => {
     localStorage.setItem("savedCities", JSON.stringify(savedCities));
   }, [savedCities]);
+
+  // ── Random Greeting + Typewriter Animation ──
+  const GREETINGS = [
+    "Greet you to have a beautiful day!",
+    "Hope the sun shines wherever you are!",
+    "Stay safe and enjoy the weather!",
+    "Good vibes and clear skies ahead!",
+    "Check the forecast, then go explore!",
+    "Every cloud has a silver lining!",
+    "Weather is fine, hope you are too!",
+    "Plan your day with confidence!",
+  ];
+
+  // Pick a random greeting once on mount (lazy initial state)
+  const [fullGreeting] = useState<string>(
+    () => GREETINGS[Math.floor(Math.random() * GREETINGS.length)]
+  );
+  const [displayedGreeting, setDisplayedGreeting] = useState<string>("");
+
+  useEffect(() => {
+    setDisplayedGreeting(""); // Reset to empty before typing starts
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedGreeting(fullGreeting.slice(0, i));
+      if (i >= fullGreeting.length) clearInterval(interval); // Stop when done
+    }, 40); // 40ms per character — adjust to speed up / slow down
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [fullGreeting]);
  
   // Add the city name to the saved cities list
   function addToSavedCities(cityName: string) {
@@ -138,7 +167,10 @@ function App() {
     <div className="app">
       <header className="app_header">
         <h1 className="app_title">Spring's Weather Forecast</h1>
-        <p className="app_subtitle">Greet you to have a beautiful day!</p>
+        <p className="app_subtitle">
+          {displayedGreeting}
+          <span className="typing-cursor">|</span>
+        </p>
  
         <form onSubmit={handleSearch} className="search-bar">
           <input
